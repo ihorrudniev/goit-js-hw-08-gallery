@@ -1,80 +1,75 @@
 import galleryItems from "./app.js";
 
-const galleryRef = document.querySelector(".js-gallery");
-const lightboxRef = document.querySelector(".js-lightbox");
-const lightboxOverlayRef = document.querySelector(".lightbox__overlay");
-const lightboxContentRef = document.querySelector(".lightbox__content");
-const lightboxImageRef = document.querySelector(".lightbox__image");
-const lightboxButtonRef = document.querySelector(".lightbox__button");
+const refs = {
+  galleryList: document.querySelector(".js-gallery"),
+  lightbox: document.querySelector(".js-lightbox"),
+  lightbox__overlay: document.querySelector(".lightbox__overlay"),
+  lightbox__image: document.querySelector(".lightbox__image"),
+  lightbox__button: document.querySelector(".lightbox__button"),
+};
 
-// create dinamic elemens HTML
-const cardsMarkup = createGallery(galleryItems);
-function createGallery(galleryItems) {
-  return galleryItems
+function createGallery(items) {
+  return items
     .map(({ preview, original, description }) => {
       return `
-    <li class="gallery__item">
-  <a
-    class="gallery__link"
-    href="${original}"
-  >
-    <img
-      class="gallery__image"
+<li class="gallery__item">
+  <a class="gallery__link"
+    href="${original}">
+      <img class="gallery__image"
       src="${preview}"
       data-source="${original}"
-      alt="${description}"
-      tabindex = num.indexOf + 1
-    />
+      alt="${description}"/>
   </a>
 </li>
-    `;
+`;
     })
     .join("");
 }
-galleryRef.insertAdjacentHTML("beforeend", cardsMarkup);
 
-// add Events Listeners
-galleryRef.addEventListener("click", onGalleryRefClick);
-lightboxRef.addEventListener("click", onCloseModal);
-document.addEventListener("keydown", onCloseModalAfterEsc);
+console.log(createGallery(galleryItems));
 
-// Event handler
-function onGalleryRefClick(e) {
+const galleryMarkup = createGallery(galleryItems);
+refs.galleryList.insertAdjacentHTML("beforeend", galleryMarkup);
+
+/*Open and close modal*/
+
+function onOpenLightboxToggle(e) {
   e.preventDefault();
-  const target = e.target;
-  console.log(target);
-  const isTadgetImg = target.classList.contains(".js-gallery");
 
-  if (isTadgetImg) {
-    lightboxRef.classList.add("is-open");
-    lightboxImageRef.setAttribute("src", target);
-    lightboxImageRef.setAttribute("alt", target);
+  if (e.target.nodeName !== "IMG") {
+    return;
   }
+  refs.lightbox.classList.toggle("is-open");
+  refs.lightbox__image.src = e.target.dataset.source;
+  refs.lightbox__image.alt = e.target.alt;
 }
 
-function onCloseModal(e) {
+function onCloseLightboxBtn(e) {
   if (e.target.nodeName === "BUTTON") {
-    lightboxEl.classList.toggle("is-open");
+    removeClassIsOpen();
   }
 }
 
-function onCloseModalAfterEsc(e) {}
+function onCloseLightboxOverlay(e) {
+  if (e.currentTarget === e.target) {
+    removeClassIsOpen();
+  }
+}
 
-// helpers function
+function onCloseLightboxESC(e) {
+  if (e.key !== "Escape") {
+    return;
+  }
+  removeClassIsOpen();
+}
 
-function closeModal() {}
+function removeClassIsOpen() {
+  refs.lightbox.classList.remove("is-open");
+  refs.lightbox__image.src = "";
+  refs.lightbox__image.alt = "";
+}
 
-// function onOpenModal(e) {
-//   // e.preventDefault();
-//   if (e.target.nodeName !== "IMG") {
-//     return;
-//   }
-//   lightboxEl.classList.toggle("is-open");
-//   lightboxImageEl.src = e.target.src;
-//   lightboxImageEl.alt = e.target.alt;
-// }
-//--------------- CloseModal--------
-
-// console.log(createGallery(galleryItems));
-
-// =======================================
+refs.galleryList.addEventListener("click", onOpenLightboxToggle);
+refs.lightbox__button.addEventListener("click", onCloseLightboxBtn);
+refs.lightbox__overlay.addEventListener("click", onCloseLightboxOverlay);
+window.addEventListener("keyup", onCloseLightboxESC);
